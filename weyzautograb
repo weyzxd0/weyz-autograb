@@ -1,0 +1,115 @@
+print("WEYZ Premium")
+
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "WEYZ",
+        Text = "Premium Instant E Loaded",
+        Duration = 5
+    })
+end)
+
+local Player = game:GetService("Players").LocalPlayer
+local PPS = game:GetService("ProximityPromptService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local UI_Target = Player:WaitForChild("PlayerGui")
+if UI_Target:FindFirstChild("WEYZ_UI") then
+    UI_Target.WEYZ_UI:Destroy()
+end
+
+local sg = Instance.new("ScreenGui", UI_Target)
+sg.Name = "WEYZ_UI"
+sg.ResetOnSpawn = false
+
+-- Ana Frame
+local Main = Instance.new("Frame", sg)
+Main.Size = UDim2.new(0, 220, 0, 90)
+Main.Position = UDim2.new(0.5, -110, 0, -100)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
+
+local strokeMain = Instance.new("UIStroke", Main)
+strokeMain.Thickness = 2
+strokeMain.Color = Color3.fromRGB(170, 0, 255)
+
+-- Gradient
+local grad = Instance.new("UIGradient", Main)
+grad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80,0,150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(170,0,255))
+}
+
+-- WEYZ Başlık
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "WEYZ"
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBlack
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+
+-- Status Label
+local StatusLabel = Instance.new("TextLabel", Main)
+StatusLabel.Size = UDim2.new(1, -20, 0, 30)
+StatusLabel.Position = UDim2.new(0, 10, 0, 50)
+StatusLabel.BackgroundColor3 = Color3.fromRGB(15,15,15)
+StatusLabel.Text = "INSTANT E: OFF [Q]"
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.TextColor3 = Color3.fromRGB(255,70,70)
+StatusLabel.TextScaled = true
+Instance.new("UICorner", StatusLabel)
+
+-- Açılış Animasyonu
+TweenService:Create(Main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
+    Position = UDim2.new(0.5, -110, 0, 30)
+}):Play()
+
+-- LOGIC
+local IsActive = false
+
+local function toggle()
+    IsActive = not IsActive
+    
+    if IsActive then
+        StatusLabel.Text = "INSTANT E: ACTIVE"
+        StatusLabel.TextColor3 = Color3.fromRGB(0,255,170)
+        
+        TweenService:Create(strokeMain, TweenInfo.new(0.4), {
+            Color = Color3.fromRGB(0,255,170)
+        }):Play()
+    else
+        StatusLabel.Text = "INSTANT E: OFF [Q]"
+        StatusLabel.TextColor3 = Color3.fromRGB(255,70,70)
+        
+        TweenService:Create(strokeMain, TweenInfo.new(0.4), {
+            Color = Color3.fromRGB(170,0,255)
+        }):Play()
+    end
+end
+
+UIS.InputBegan:Connect(function(i, p)
+    if not p and i.KeyCode == Enum.KeyCode.Q then
+        toggle()
+    end
+end)
+
+PPS.PromptButtonHoldBegan:Connect(function(prompt)
+    if IsActive then
+        prompt.HoldDuration = 0
+        task.spawn(function()
+            prompt:InputHoldBegin()
+            prompt:InputHoldEnd()
+            if fireproximityprompt then 
+                fireproximityprompt(prompt) 
+            end
+        end)
+    end
+end)
+
+PPS.PromptShown:Connect(function(prompt)
+    if IsActive then
+        prompt.HoldDuration = 0
+    end
+end)
